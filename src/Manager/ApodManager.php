@@ -1,10 +1,10 @@
 <?php
 
-namespace App;
+namespace App\Manager;
 
+use App\DTO\ApodDTO;
 use App\Entity\Apod;
 use App\Repository\ApodRepository;
-use Exception;
 
 class ApodManager
 {
@@ -15,22 +15,14 @@ class ApodManager
         $this->apodRepository = $apodRepository;
     }
 
-    public function savePictureOfTheDay(array $content): Apod
+    public function savePictureOfTheDay(ApodDTO $apodDTO): Apod
     {
-        $date = new \DateTime($content['date']);
-
-        // check if a record already exists for the given date
-        $apodFromDb = $this->apodRepository->findOneBy(['date' => $date]);
+        $apodFromDb = $this->apodRepository->findOneBy(['date' => $apodDTO->getDate()]);
         if ($apodFromDb instanceof Apod) {
             return $apodFromDb;
         }
 
-        $apod = new Apod();
-        $apod->setTitle($content['title'])
-            ->setDate($date)
-            ->setExplanation($content['explanation'])
-            ->setImage($content['hdurl']);
-
+        $apod = Apod::fromDTO($apodDTO);
         $this->apodRepository->add($apod, true);
 
         return $apod;
