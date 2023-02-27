@@ -1,0 +1,19 @@
+{% extends "base.html.twig" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/apod.css') }}">
+{% endblock %}
+
+{% block body %}
+    <main>
+        <section class="apod">
+            {% if picture_of_the_day is not null %}
+                <h1>{{ picture_of_the_day.date | date('d/m/Y') ~ ' - ' ~ picture_of_the_day.title }}</h1>
+                <img width="500" src="{{ picture_of_the_day.image }}" alt="{{ picture_of_the_day.title }}">
+                <p>{{ picture_of_the_day.explanation }}</p>
+            {% else %}
+                <p>There's no picture of the day</p>
+            {% endif %}
+        </section>
+    </main>
+{% endblock %}
