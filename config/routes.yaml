@@ -1,3 +1,12 @@
-index:
+app_index:
     path: /
     controller: App\Controller\HomeController::index
+app_show_apod:
+    path: /apod
+    controller: App\Controller\HomeController::showApod
+connect_google_start:
+    path: /connect/google
+    controller: App\Controller\GoogleController::connectAction
+connect_google_check:
+    path: /connect/google/check
+    controller: App\Controller\GoogleController::connectCheckAction

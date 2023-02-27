@@ -2,7 +2,8 @@
 
 namespace App\Command;
 
-use App\Service\POTD;
+use App\ApodManager;
+use App\Service\ApodService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -15,12 +16,14 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 class FetchPictureOfTheDayCommand extends Command
 {
     protected static $defaultName = 'app:fetch:potd';
-    private $nasaAPI;
+    private ApodService $apodService;
+    private ApodManager $apodManager;
 
-    public function __construct(POTD $pictureOfTheDayService)
+    public function __construct(ApodService $apodService, ApodManager $apodManager)
     {
-        $this->pictureOfTheDayService = $pictureOfTheDayService;
         parent::__construct();
+        $this->apodService = $apodService;
+        $this->apodManager = $apodManager;
     }
 
     protected function configure(): void
@@ -28,22 +31,19 @@ class FetchPictureOfTheDayCommand extends Command
         $this->setDescription("Fetch NASA Picture of the day");
     }
 
-    /**
-     * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
-     * @throws ClientExceptionInterface
-     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
-            $pictureOfTheDay = $this->pictureOfTheDayService->fetchPictureOfTheDay();
-            $output->write("POTD has been fetched");
-            return Command::SUCCESS;
+            $apod = $this->apodService->fetchPictureOfTheDay();
+            if ("image" === $apod['media_type']) {
+                $this->apodManager->savePictureOfTheDay($apod);
+            }
         } catch (\Exception $exception) {
             $output->write($exception->getMessage());
             return Command::FAILURE;
         }
+
+        $output->write("Picture of the day has been fetched");
+        return Command::SUCCESS;
     }
 }
