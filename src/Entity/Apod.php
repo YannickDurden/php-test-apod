@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\DTO\ApodDTO;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\ApodRepository;
 
@@ -89,5 +90,16 @@ class Apod
         $this->image = $image;
 
         return $this;
+    }
+
+    public static function fromDTO(ApodDTO $apodDTO): Apod
+    {
+        $apod = new self();
+        $apod->setTitle($apodDTO->getTitle())
+            ->setDate($apodDTO->getDate())
+            ->setExplanation($apodDTO->getExplanation())
+            ->setImage($apodDTO->getHdurl());
+
+        return $apod;
     }
 }

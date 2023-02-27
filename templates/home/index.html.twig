@@ -6,9 +6,15 @@
 
 {% block body %}
 <main>
-    <h1>If you want to visualize the picture of the day, you must me logged</h1>
-    <div>
-        <a class="login" href="{{ path('connect_google_start') }}">Login</a>
-    </div>
+    {% if app.user %}
+        <div>
+            <a class="button" href="{{ path('app_show_apod') }}">Show APOD</a>
+        </div>
+    {% else %}
+        <h1>If you want to visualize the picture of the day, you must me logged</h1>
+        <div>
+            <a class="button" href="{{ path('connect_google_start') }}">Login</a>
+        </div>
+    {% endif %}
 </main>
 {% endblock %}

@@ -2,16 +2,11 @@
 
 namespace App\Command;
 
-use App\ApodManager;
+use App\Manager\ApodManager;
 use App\Service\ApodService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class FetchPictureOfTheDayCommand extends Command
 {
@@ -35,7 +30,7 @@ class FetchPictureOfTheDayCommand extends Command
     {
         try {
             $apod = $this->apodService->fetchPictureOfTheDay();
-            if ("image" === $apod['media_type']) {
+            if ("image" === $apod->getMediaType()) {
                 $this->apodManager->savePictureOfTheDay($apod);
             }
         } catch (\Exception $exception) {

@@ -2,16 +2,13 @@
 
 namespace App\Service;
 
-use App\ApodManager;
-use App\Entity\Apod;
 use Exception;
+use App\DTO\ApodDTO;
+use App\Entity\Apod;
+use App\Manager\ApodManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class ApodService
@@ -20,17 +17,20 @@ class ApodService
     private string $nasaApiKey;
     private ApodManager $apodManager;
     private LoggerInterface $logger;
+    private SerializerInterface $serializer;
 
     public function __construct(
         HttpClientInterface $client,
         $nasaApiKey,
         ApodManager $apodManager,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        SerializerInterface $serializer
     ) {
         $this->client = $client;
         $this->nasaApiKey = $nasaApiKey;
         $this->apodManager = $apodManager;
         $this->logger = $logger;
+        $this->serializer = $serializer;
     }
 
     private function getNasaApiKey(): string
@@ -38,10 +38,8 @@ class ApodService
         return $this->nasaApiKey;
     }
 
-    public function fetchPictureOfTheDay(): array
+    public function fetchPictureOfTheDay(): ApodDTO
     {
-        // return json_decode(file_get_contents('data.json'), true);
-
         $url = sprintf(
             "https://api.nasa.gov/planetary/apod?api_key=%s",
             $this->nasaApiKey
@@ -55,7 +53,7 @@ class ApodService
 
         $content = $response->getContent();
 
-        return $response->toArray();
+        return $this->serializer->deserialize($content, ApodDTO::class, 'json');
     }
 
     public function getPictureOfTheDay(): ?Apod
@@ -67,7 +65,7 @@ class ApodService
             return $this->apodManager->getLastRecord();
         }
 
-        if ("image" !== $apod['media_type']) {
+        if ("image" !== $apod->getMediaType()) {
             return $this->apodManager->getLastRecord();
         }
 
